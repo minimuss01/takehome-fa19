@@ -95,6 +95,18 @@ def add_contact():
     new_contact = db.create("contacts", {"name": name, "hobby": hobby, "nickname": nickname})
     return create_response(status=201, data={"contacts": new_contact})
 
+@app.route("/contacts/<id>", methods=['PUT'])
+def update_contact(id):
+    try:
+        req_data = request.get_json()
+    except:
+        return create_response(status=400, message="Update malformed")
+    update_values = {key: val for (key, val) in req_data.items() if key in ('name', 'hobby', 'nickname')}
+    updated_contact = db.updateById("contacts", int(id), update_values)
+    if updated_contact is None:
+        return create_response(status=404, message="No contact with this id exists")
+    return create_response(status=201, data={"contacts": updated_contact})
+
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
 """

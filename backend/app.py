@@ -70,10 +70,10 @@ def delete_show(id):
 
 @app.route("/contacts/<id>", methods=['GET'])
 def get_contact_by_id(id):
-    db_id = db.getById('contacts', int(id))
-    if db_id is None:
+    contact = db.getById('contacts', int(id))
+    if contact is None:
         return create_response(status=404, message="No contact with this id exists")
-    return create_response({"contacts": db_id})
+    return create_response({"contacts": contact})
 
 def contacts_hobby_query(hobby):
     filtered_contacts = [x for x in db.get('contacts') if x['hobby'] == hobby]
@@ -81,6 +81,19 @@ def contacts_hobby_query(hobby):
         return create_response(status=404, message="No contacts with this hobby exist")
     else:
         return create_response({"contacts": filtered_contacts})
+
+@app.route("/contacts", methods=['POST'])
+def add_contact():
+    req_data = request.get_json()
+    try:
+        name = req_data["name"]
+        hobby = req_data["hobby"]
+        nickname = req_data["nickname"]
+    except KeyError:
+        fail_message = f"Contact is missing key(s) {[x for x in ('name' , 'hobby', 'nickname') if x not in req_data]}"
+        return create_response(status=422, message=fail_message)
+    new_contact = db.create("contacts", {"name": name, "hobby": hobby, "nickname": nickname})
+    return create_response(status=201, data={"contacts": new_contact})
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~

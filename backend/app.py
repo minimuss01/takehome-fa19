@@ -53,6 +53,9 @@ def mirror(name):
 
 @app.route("/contacts", methods=['GET'])
 def get_all_contacts():
+    hobby = request.args.get('hobby')
+    if hobby != None:
+        return contacts_hobby_query(hobby)
     return create_response({"contacts": db.get('contacts')})
 
 @app.route("/shows/<id>", methods=['DELETE'])
@@ -71,6 +74,13 @@ def get_contact_by_id(id):
     if db_id is None:
         return create_response(status=404, message="No contact with this id exists")
     return create_response({"contacts": db_id})
+
+def contacts_hobby_query(hobby):
+    filtered_contacts = [x for x in db.get('contacts') if x['hobby'] == hobby]
+    if len(filtered_contacts) == 0:
+        return create_response(status=404, message="No contacts with this hobby exist")
+    else:
+        return create_response({"contacts": filtered_contacts})
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
